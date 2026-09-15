@@ -15,8 +15,11 @@ jobs:
 
       - name: Unzip Project
         run: |
-          unzip APStaffAttendance.zip
-          mv APStaffAttendance/* .
+          unzip -o APStaffAttendance.zip
+          if [ -d "APStaffAttendance" ]; then
+            cp -r APStaffAttendance/* . || true
+            cp -r APStaffAttendance/.* . || true
+          fi
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
