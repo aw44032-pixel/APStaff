@@ -1,4 +1,4 @@
-name: Build Android APK
+  name: Build Android APK
 
 on:
   push:
@@ -13,12 +13,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Unzip Project
+      - name: Unzip Project Files
         run: |
           unzip -o APStaffAttendance.zip
+          shopt -s dotglob
           if [ -d "APStaffAttendance" ]; then
-            cp -r APStaffAttendance/* . || true
-            cp -r APStaffAttendance/.* . || true
+            cp -r APStaffAttendance/* .
           fi
 
       - name: Set up JDK 17
@@ -27,14 +27,22 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Make Gradlew Executable
-        run: chmod +x gradlew
+      - name: Fix Permissions and Make Executable
+        run: |
+          find . -name "gradlew" -exec chmod +x {} +
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
+        run: |
+          if [ -f "./gradlew" ]; then
+            ./gradlew assembleDebug
+          else
+            cd APStaffAttendance && ./gradlew assembleDebug
+          fi
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Staff-Attendance-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: |
+            **/app/build/outputs/apk/debug/app-debug.apk
+            **/build/outputs/apk/debug/*.apk
